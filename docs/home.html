@@ -518,11 +518,11 @@ document.write(`
     <li><code>ufc-master.csv</code> (Mdabbert, 2021): bevat aanvullende informatie zoals namen, odds en achtergrondgegevens</li>
   </ul>
 
-  <p><strong>🔄 STAP 1 – Inladen van de datasets</strong></p>
+  <p><strong>1. – Inladen van de datasets</strong></p>
   <pre><code>df1 = pd.read_csv("data.csv")
 df2 = pd.read_csv("ufc-master.csv")</code></pre>
 
-  <p><strong>🧱 STAP 2 – Harmoniseren van kolomnamen</strong></p>
+  <p><strong>2. – Harmoniseren van kolomnamen</strong></p>
   <p>In <code>data.csv</code> heten vechterskolommen <code>R_fighter</code> en <code>B_fighter</code>, in <code>ufc-master.csv</code> heten ze <code>RedFighter</code> en <code>BlueFighter</code>. Die passen we aan:</p>
   <pre><code>df2 = df2.rename(columns={
     'RedFighter': 'R_fighter',
@@ -554,7 +554,7 @@ df_clean = df_clean[~df_clean['weight_class'].str.contains('Catch|Women', case=F
   <p><strong>💾 STAP 7 – Opslaan van de opgeschoonde dataset</strong></p>
   <pre><code>df_clean.to_csv("ufc_clean.csv", index=False)</code></pre>
   <p>Deze dataset kan nu gebruikt worden in Python, Excel, Power BI of andere tools.</p>
-  
+
 </section>
 <section id="data-story-tenniswedstrijden-winnen">
 <h2>Data story: tenniswedstrijden winnen<a class="headerlink" href="#data-story-tenniswedstrijden-winnen" title="Link to this heading">#</a></h2>
