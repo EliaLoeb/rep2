@@ -500,27 +500,61 @@ document.write(`
 
 <p>Door deze factoren afzonderlijk en in samenhang te analyseren, en de data per gevecht én per gewichtsklasse te structureren, hopen we waardevolle inzichten te bieden voor coaches, analisten en vechters. De resultaten worden gepresenteerd aan de hand van statistieken, visualisaties en reflectie per perspectief. In de onderzoek wordt alleen gekeken naar de mannelijke vechters. </p>
 
-</section>
 <section id="dataset-en-preprocessing">
-<h2>Dataset en Preprocessing<a class="headerlink" href="#dataset-en-preprocessing" title="Link to this heading">#</a></h2>
-<p><strong>De code verwerkt twee verschillende tennis datasets (ATP voor mannen en WTA voor vrouwen), combineert ze en slaat de gecombineerde dataset op</strong>.</p>
-<p><i>De stappen zijn als volgt</i>:</p>
-<ol class="arabic simple">
-<li><p><b>Datasets laden</b>: De ATP- en WTA-datasets worden ingeladen vanuit CSV-bestanden.</p></li>
-<li><p><b>Preprocessingsfunctie definiëren</b>:</p></li>
-</ol>
-<ul class="simple">
-<li><p>Kolommen verwijderen: Bepaalde (belangrijke) kolommen die voor een erg groot deel ontbreken, worden verwijderd.</p></li>
-<li><p>Datum conversie: De kolom ‘tourney_date’ wordt omgezet naar een datetime-formaat.</p></li>
-<li><p>Verwijderen van rijen met ontbrekende waarden: Rijen met ontbrekende waarden in de kolommen ‘winner_age’, ‘loser_age’, ‘winner_ht’ of ‘loser_ht’ worden verwijderd.</p></li>
-<li><p>Leeftijdskolommen omzetten: De ‘winner_age’ en ‘loser_age’ kolommen worden omgezet naar numerieke waarden, waarbij eventuele komma’s worden vervangen door punten.</p></li>
-<li><p>Geslachtskolom toevoegen: Een nieuwe kolom ‘gender’ wordt toegevoegd aan de dataset zodat de twee datasets kunnen worden gecombineerd, maar tegelijkertijd de onderscheid tussen man/vrouw gemaakt kan worden.</p></li>
-</ul>
-<ol class="arabic simple" start="3">
-<li><p><b>Functie toepassen</b>: De preprocessingsfunctie wordt toegepast op zowel de ATP- als de WTA-dataset. Daarnaast bestond de WTA dataset alleen uit wedstrijden uit 2022, terwijl de ATP meerdere jaren bevatte. We hebben ervoor gekozen die dataset ook te beperken tot het jaar 2022. Verder waren de datasets wat betreft de kolommen zeer gelijk, dus geschikt om te combineren.</p></li>
-<li><p><b>Datasets combineren</b>: De schoongemaakte ATP- en WTA-datasets worden gecombineerd tot één dataset.</p></li>
-<li><p><b>Gecombineerde dataset opslaan</b>: De gecombineerde dataset wordt opgeslagen in een nieuw CSV-bestand.</p></li>
-</ol>
+  <h2>Dataset preprocessing<a class="headerlink" href="#dataset-en-preprocessing" title="Link to this heading">#</a></h2>
+  <p>Het doel van deze preprocessing is om een schone en betrouwbare dataset op te bouwen waarmee je kunt onderzoeken welke factoren bijdragen aan het winnen van een UFC-gevecht.</p>
+  
+  <p>De analyse focust op twee hoofdtypen variabelen:</p>
+  <ul>
+    <li><strong>Lichamelijke kenmerken</strong>: dingen die relatief vaststaan, zoals leeftijd, lengte en reach</li>
+    <li><strong>Trainbare prestatiekenmerken</strong>: zoals strike accuracy, takedown accuracy en submission attempts</li>
+  </ul>
+  
+  <p>We kijken dus hoe deze eigenschappen samenhangen met de uitkomst van een gevecht (wie wint).</p>
+
+  <p>Om dit mogelijk te maken combineren we twee datasets van Kaggle:</p>
+  <ul>
+    <li><code>data.csv</code> (Rajeevw, 2019): bevat gedetailleerde statistieken per vechter en per gevecht</li>
+    <li><code>ufc-master.csv</code> (Mdabbert, 2021): bevat aanvullende informatie zoals namen, odds en achtergrondgegevens</li>
+  </ul>
+
+  <p><strong>🔄 STAP 1 – Inladen van de datasets</strong></p>
+  <pre><code>df1 = pd.read_csv("data.csv")
+df2 = pd.read_csv("ufc-master.csv")</code></pre>
+
+  <p><strong>🧱 STAP 2 – Harmoniseren van kolomnamen</strong></p>
+  <p>In <code>data.csv</code> heten vechterskolommen <code>R_fighter</code> en <code>B_fighter</code>, in <code>ufc-master.csv</code> heten ze <code>RedFighter</code> en <code>BlueFighter</code>. Die passen we aan:</p>
+  <pre><code>df2 = df2.rename(columns={
+    'RedFighter': 'R_fighter',
+    'BlueFighter': 'B_fighter'
+})</code></pre>
+
+  <p><strong>🔗 STAP 3 – Combineren van de datasets</strong></p>
+  <pre><code>df_merged = pd.merge(df1, df2, on=['R_fighter', 'B_fighter'], how='inner')</code></pre>
+
+  <p><strong>📌 STAP 4 – Selecteren van relevante kolommen</strong></p>
+  <p>We kiezen alleen de kolommen die relevant zijn voor analyse:</p>
+  <ul>
+    <li><strong>Lichamelijke kenmerken</strong>: <code>R_age</code>, <code>B_age</code>, <code>R_Height_cms</code>, <code>B_Height_cms</code>, <code>R_Reach_cms</code>, <code>B_Reach_cms</code></li>
+    <li><strong>Trainbare kenmerken</strong>: <code>R_avg_SIG_STR_pct</code>, <code>B_avg_SIG_STR_pct</code>, <code>R_avg_TD_pct</code>, <code>B_avg_TD_pct</code>, <code>R_avg_SUB_ATT</code>, <code>B_avg_SUB_ATT</code></li>
+    <li><code>weight_class</code> en <code>Winner_x</code></li>
+  </ul>
+
+  <pre><code>df_clean = df_merged[relevant_columns].copy()</code></pre>
+
+  <p><strong>🚫 STAP 5 – Schoonmaken van de data</strong></p>
+  <pre><code>df_clean = df_clean.replace([...], pd.NA).dropna()
+df_clean = df_clean[~df_clean['weight_class'].str.contains('Catch|Women', case=False, na=False)]</code></pre>
+
+  <p><strong>➕ STAP 6 – Toevoegen van verschilvariabelen</strong></p>
+  <p>We voegen verschillen toe tussen Red en Blue vechters (bijv. leeftijd, lengte, accuracy):</p>
+  <pre><code>df_clean['age_diff'] = df_clean['R_age'] - df_clean['B_age']
+# enzovoort...</code></pre>
+
+  <p><strong>💾 STAP 7 – Opslaan van de opgeschoonde dataset</strong></p>
+  <pre><code>df_clean.to_csv("ufc_clean.csv", index=False)</code></pre>
+  <p>Deze dataset kan nu gebruikt worden in Python, Excel, Power BI of andere tools.</p>
+  
 </section>
 <section id="data-story-tenniswedstrijden-winnen">
 <h2>Data story: tenniswedstrijden winnen<a class="headerlink" href="#data-story-tenniswedstrijden-winnen" title="Link to this heading">#</a></h2>
