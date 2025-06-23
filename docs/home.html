@@ -529,10 +529,10 @@ df2 = pd.read_csv("ufc-master.csv")</code></pre>
     'BlueFighter': 'B_fighter'
 })</code></pre>
 
-  <p><strong>🔗 STAP 3 – Combineren van de datasets</strong></p>
+  <p><strong>3. – Combineren van de datasets</strong></p>
   <pre><code>df_merged = pd.merge(df1, df2, on=['R_fighter', 'B_fighter'], how='inner')</code></pre>
 
-  <p><strong>📌 STAP 4 – Selecteren van relevante kolommen</strong></p>
+  <p><strong>4. – Selecteren van relevante kolommen</strong></p>
   <p>We kiezen alleen de kolommen die relevant zijn voor analyse:</p>
   <ul>
     <li><strong>Lichamelijke kenmerken</strong>: <code>R_age</code>, <code>B_age</code>, <code>R_Height_cms</code>, <code>B_Height_cms</code>, <code>R_Reach_cms</code>, <code>B_Reach_cms</code></li>
@@ -542,16 +542,16 @@ df2 = pd.read_csv("ufc-master.csv")</code></pre>
 
   <pre><code>df_clean = df_merged[relevant_columns].copy()</code></pre>
 
-  <p><strong>🚫 STAP 5 – Schoonmaken van de data</strong></p>
+  <p><strong>5. – Schoonmaken van de data</strong></p>
   <pre><code>df_clean = df_clean.replace([...], pd.NA).dropna()
 df_clean = df_clean[~df_clean['weight_class'].str.contains('Catch|Women', case=False, na=False)]</code></pre>
 
-  <p><strong>➕ STAP 6 – Toevoegen van verschilvariabelen</strong></p>
+  <p><strong>6. – Toevoegen van verschilvariabelen</strong></p>
   <p>We voegen verschillen toe tussen Red en Blue vechters (bijv. leeftijd, lengte, accuracy):</p>
   <pre><code>df_clean['age_diff'] = df_clean['R_age'] - df_clean['B_age']
 # enzovoort...</code></pre>
 
-  <p><strong>💾 STAP 7 – Opslaan van de opgeschoonde dataset</strong></p>
+  <p><strong>7. – Opslaan van de opgeschoonde dataset</strong></p>
   <pre><code>df_clean.to_csv("ufc_clean.csv", index=False)</code></pre>
   <p>Deze dataset kan nu gebruikt worden in Python, Excel, Power BI of andere tools.</p>
 
